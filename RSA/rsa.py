@@ -48,17 +48,22 @@ k = (p - 1) * (q - 1)
 e = 65537
 d = mul_inverse(e, k)
 
-def encrypt(string):
-    """ Encrypt the STRING using the defined public keys.
-    Returns a Python List of encrypted characters. """
+def encrypt_to_lst(string, N, e):
+    """ Helper function. Encrypt each character individually, then save to a list. """
     if type(string) != str:
         string = str(string)
     result = [pow(ord(i), e, N) for i in string]
     return result
 
-def encrypt_to_str(string):
-    result = encrypt(string)
-    result = [hex(x)[2:] for x in result]
+def encrypt(string):
+    """ Encrypt the STRING using the defined public keys.
+    Returns a string of encrypted characters. """
+    result = encrypt_to_lst(string, N, e)
+    for x in range(0, len(result)):
+        s = str(result[x])
+        if len(s) < 308:
+            s = '0' + s
+        result[x] = s
     return "".join(result)
 
 def encrypt_to_file(string, filename):
@@ -68,18 +73,31 @@ def encrypt_to_file(string, filename):
     write_file(filename, encrypted_string)
     return encrypted_string
 
-def decrypt(char_list):
-    """ Takes in a Python List of encrypted characters, decrypt the characters one-by-one,
+def decrypt_lst(char_list):
+    """ A helper function. Takes in a Python List of encrypted characters, decrypt the characters one-by-one,
     then recombine the characters into a string. """
     result = [chr(pow(x, d, N)) for x in char_list]
     return "".join(result)
 
-def decrypt_from_str(string):
-    pass
+def str_to_list(string):
+    """ A helper function.
+    Converts the string of encrypted characters into a list for further decryption """
+    char_list = []
+    i = 0
+    char = ''
+    while i < len(string):
+        char = char + string[i:i+308]
+        char_list.append(int(char))
+        char = ''
+        i += 308
+    return char_list
+
+def decrypt(string):
+    return decrypt_lst(str_to_list(string))
 
 def decrypt_file(filename):
-    """ Read in a file that contains a Python List of encrypted characters, then decrypt it. """
+    """ Read in a file that contains a string of encrypted characters, then decrypt it. """
     file = open(filename, 'r')
-    encrypted = ast.literal_eval(file.read())
+    encrypted = file.read()
     file.close()
     return decrypt(encrypted)
