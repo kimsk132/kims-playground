@@ -21,7 +21,7 @@ def encrypt(string):
     result = encrypt_to_lst(string, N, e)
     for x in range(0, len(result)):
         s = str(result[x])
-        if len(s) < 308:
+        while len(s) < 308:
             s = '0' + s
         result[x] = s
     return "".join(result)
