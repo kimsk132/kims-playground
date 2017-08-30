@@ -10,7 +10,11 @@ import ast
 "======= Utilities ======="
 
 def ext_gcd(x, y):
-    """ Calculates the GCD of X and Y using Euclid's Algorithm. """
+    """
+    Calculates the GCD of X and Y using Extended Euclid's Algorithm. 
+    Code derived from the pseudo-code given in page 6 of CS 70 lecture notes:
+    http://sp17.eecs70.org/static/notes/n6.pdf
+    """
     if x < y:
         # print("Warning: the first number should be greater than the second number.")
         return ext_gcd(y, x)
