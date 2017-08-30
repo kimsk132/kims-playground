@@ -1,7 +1,7 @@
 """
 An RSA client for encrypting strings. The encrypted message can then be sent to the host.
 Author: Pairode Jaroensri
-Last visited August 29, 2017
+Last visited August 30, 2017
 """
 
 "========== RSA Core =========="
