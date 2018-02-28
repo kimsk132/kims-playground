@@ -8,6 +8,7 @@ Before using it, please change the ANIMATE function to match your system's lm-se
 """
 
 import os
+from collections import deque
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -30,7 +31,7 @@ for i in range(0, 10):
 
 # Define history range and temperature polling interval
 x = np.arange(-60, 1, 1)
-temps = []
+temps = deque()
 for i in range(61):
     temps.append(None)
 
@@ -45,7 +46,7 @@ def animate(i):
     # The slicing should give you the desired sensor reading from lm-sensors
     print(physical, "°C")
     temps.append(physical)
-    temps.pop(0)
+    temps.popleft()
     line.set_ydata(temps)  # update the data
     return line,
 
