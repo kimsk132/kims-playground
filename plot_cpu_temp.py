@@ -32,7 +32,7 @@ for i in range(0, 10):
 x = np.arange(-60, 1, 1)
 temps = []
 for i in range(61):
-    temps.append(0)
+    temps.append(None)
 
 line, = ax.plot(x, temps)
 line.set_color('r')
