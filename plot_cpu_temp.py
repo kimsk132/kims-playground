@@ -2,7 +2,7 @@
 Author: Pairode Jaroensri
 Last revision: Feb 28, 2018
 
-This program plots the CPU temperature in real time with poll rate of 1 Hz.
+This program plots the CPU temperature in real time with the poll rate of 1 Hz.
 Dependencies: lm-sensors, numpy, matplotlib
 Before using it, please change the ANIMATE function to match your system's lm-sensors output.
 """
@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from matplotlib import animation
 
-# Set up the figures
+# Set up the figure
 fig, ax = plt.subplots()
 ax.yaxis.tick_right()
 ax.yaxis.set_label_position("right")
