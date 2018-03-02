@@ -5,7 +5,7 @@ Last revision: March 1, 2018
 This program plots the CPU temperature in real time with the poll rate of FREQUENCY Hz
 and plotting up to TIME_LENGTH seconds back.
 FREQUENCY is best kept under 5 Hz.
-Dependencies: lm-sensors, matplotlib
+Dependencies: lm-sensors, matplotlib, tkinter
 
 Remark:
 Before using it, you might need to change the variable PAT in GET_CPU_TEMP function
@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from matplotlib import animation
 from collections import deque
+from tkinter import messagebox
 
 frequency = 2
 time_length = 60
@@ -30,6 +31,8 @@ def get_cpu_temp():
 def animate(temps):
     physical = get_cpu_temp()
     print(physical, "°C")
+    if physical >= 80:
+        messagebox.showwarning("Warning","The CPU temperature has reached 80°C.")
     temps.append(physical)
     temps.popleft()
     line.set_ydata(temps)  # update the data
@@ -55,6 +58,7 @@ if __name__ == '__main__':
     ax.yaxis.set_minor_locator(ticker.MultipleLocator(2))
     for i in range(0, 10):
         plt.axhline(i*10, color='0.75')
+        plt.axvline(-i*10, color='0.75')
 
     # Define history range and temperature polling interval
     x = [i/frequency for i in range(-time_length*frequency,1)]
