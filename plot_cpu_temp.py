@@ -2,7 +2,9 @@
 Author: Pairode Jaroensri
 Last revision: March 1, 2018
 
-This program plots the CPU temperature in real time with the poll rate of 1 Hz.
+This program plots the CPU temperature in real time with the poll rate of FREQUENCY Hz
+and plotting up to TIME_LENGTH seconds back.
+FREQUENCY is best kept under 5 Hz.
 Dependencies: lm-sensors, matplotlib
 
 Remark:
@@ -15,6 +17,9 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from matplotlib import animation
 from collections import deque
+
+frequency = 2
+time_length = 60
 
 def get_cpu_temp():
     sensors = os.popen('sensors').read()
@@ -30,6 +35,10 @@ def animate(temps):
     line.set_ydata(temps)  # update the data
     return line,
 
+def init():
+    line.set_ydata([None for i in range(-time_length*frequency,1)])
+    return line,
+
 if __name__ == '__main__':
     # Set up the figure
     fig, ax = plt.subplots()
@@ -37,7 +46,7 @@ if __name__ == '__main__':
     ax.yaxis.tick_right()
     ax.yaxis.set_label_position("right")
     ax.set_ylim([0, 100])
-    ax.set_xlim([-60, 0])
+    ax.set_xlim([-time_length, 0])
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("CPU Temp (°C)")
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
@@ -48,14 +57,15 @@ if __name__ == '__main__':
         plt.axhline(i*10, color='0.75')
 
     # Define history range and temperature polling interval
-    x = [i for i in range(-60,1)]
+    x = [i/frequency for i in range(-time_length*frequency,1)]
     temps = deque()
-    for i in range(61):
+    for i in range(time_length*frequency+1):
         temps.append(None)
+    assert len(x) == len(temps)
 
     line, = ax.plot(x, temps)
     line.set_color('r')
 
-    ani = animation.FuncAnimation(fig, animate, [temps],
-                                  interval=1000, blit=True)
+    ani = animation.FuncAnimation(fig, animate, [temps], init_func=init,
+                                  interval=1000/frequency, blit=True)
     plt.show()
