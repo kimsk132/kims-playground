@@ -36,7 +36,7 @@ def animate(temps):
     return line,
 
 def init():
-    line.set_ydata([None for i in range(-time_length*frequency,1)])
+    line.set_ydata([None for _ in range(-time_length*frequency,1)])
     return line,
 
 if __name__ == '__main__':
