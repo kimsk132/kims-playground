@@ -12,15 +12,12 @@ Before using it, you might need to change the variable PAT in GET_CPU_TEMP funct
 to match your system's lm-sensors output.
 """
 
-import os, re
+import os, re, argparse
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from matplotlib import animation
 from collections import deque
 from tkinter import messagebox
-
-frequency = 2
-time_length = 60
 
 def get_cpu_temp():
     sensors = os.popen('sensors').read()
@@ -43,6 +40,16 @@ def init():
     return line,
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description = "CPU Temperature Monitor")
+    parser.add_argument("frequency", nargs='?', default=2, type=int, help = "poll_frequency")
+    parser.add_argument("time", nargs='?', default=60, type=int, help = "time")
+    args = parser.parse_args()
+
+    frequency = args.frequency
+    time_length = args.time
+
+    print("Poll frequency: {0} Hz\nTime: {1} s\n".format(frequency, time_length))
+
     # Set up the figure
     fig, ax = plt.subplots()
     plt.title("CPU temperature")
