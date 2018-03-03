@@ -1,11 +1,14 @@
 """
 Author: Pairode Jaroensri
-Last revision: March 1, 2018
+Last revision: March 3, 2018
 
 This program plots the CPU temperature in real time with the poll rate of FREQUENCY Hz
 and plotting up to TIME_LENGTH seconds back.
 FREQUENCY is best kept under 5 Hz.
+
 Dependencies: lm-sensors, matplotlib, tkinter
+
+Usage: python3 plot_cpu_temp.py [-h] [frequency] [time]
 
 Remark:
 Before using it, you might need to change the variable PAT in GET_CPU_TEMP function
@@ -41,8 +44,8 @@ def init():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = "CPU Temperature Monitor")
-    parser.add_argument("frequency", nargs='?', default=2, type=int, help = "poll_frequency")
-    parser.add_argument("time", nargs='?', default=60, type=int, help = "time")
+    parser.add_argument("frequency", nargs='?', default=2, type=int, help = "Poll frequency")
+    parser.add_argument("time", nargs='?', default=60, type=int, help = "History length in seconds")
     args = parser.parse_args()
 
     frequency = args.frequency
