@@ -49,9 +49,10 @@ def operating_state(code):
         return "Power related Error"
     if code == 15:
         return "Recovered from Error"
-    return "Invalid status code read from the compressor."
+    return "Unable to interpret status code: " + str(code)
 
-def warning_state(code):
+def warning_state(fl_code):
+    code = round(fl_code)
     if code == 0:
         return "No warnings"
     if code == -1:
@@ -94,9 +95,10 @@ def warning_state(code):
     if code == -524288:
         return "Cold head motor Stall"
 
-    return "Invalid status code read from the compressor."
+    return "[Unable to interpret warning code: " + str(fl_code) + "]"
 
-def error_state(code):
+def error_state(fl_code):
+    code = round(fl_code)
     if code == 0:
         return "No Errors"
     if code == -1:
@@ -143,7 +145,7 @@ def error_state(code):
     if code == -262144:
         return "Static Pressure Low"
 
-    return "Invalid status code read from the compressor."
+    return "[Unable to interpret error code: " + str(fl_code) + "]"
 
 def pressure_unit(code):
     if code == 0:
@@ -152,7 +154,7 @@ def pressure_unit(code):
         return "Bar"
     if code == 2:
         return "kPa"
-    return "Invalid Unit"
+    return "[Unable to interpret pressure unit code: " + str(code) + "]"
 
 def temp_unit(code):
     if code == 0:
@@ -161,7 +163,7 @@ def temp_unit(code):
         return "C"
     if code == 2:
         return "K"
-    return "Invalid Unit"
+    return "[Unable to interpret temperature unit code: " + str(code) + "]"
 
 def turn_on_compressor(device):
     device.write_register(1, 0x0001, functioncode=6)
@@ -183,12 +185,10 @@ def monitor(device):
 
     warning = device.read_registers(3, 2, functioncode=4)
     warning = interpret_float(warning)
-    warning = round(warning)
     warning_text = YELLOW + warning_state(warning) + WHITE
 
     error = device.read_registers(5, 2, functioncode=4)
     error = interpret_float(error)
-    error = round(error)
     error_text = RED + error_state(error) + WHITE
 
     if error == 0:
