@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thursday April 12, 2018
-Last revised: April 12, 2018
+Last revised: April 23, 2018
 
 @author: Pairode Kim Jaroensri
 
 ###############################################################################
-Documentation
+This script monitors the Cryomech compressor with the option to turn on/off
+the compressor through serial communuication.
+
+The ability to turn on/off has NOT been tested.
 ###############################################################################
 """
 import minimalmodbus, time, struct
-#device.debug = True
+# Constants
+minimalmodbus.BAUDRATE = 115200
+minimalmodbus.TIMEOUT = 2
+port = '/dev/ttyS0'
+
 YELLOW = '\033[93m'
 RED = '\033[91m'
 WHITE = '\033[0m'
@@ -239,9 +246,8 @@ def main():
     print("\n=============================================")
     print("     Cryomech Compressor Monitor v.1.416     ")
     print("=============================================")
-    minimalmodbus.BAUDRATE = 115200
-    minimalmodbus.TIMEOUT = 2
-    device = minimalmodbus.Instrument('/dev/ttyS0', 16)
+
+    device = minimalmodbus.Instrument(port, 16)
     while 1:
         print("\nEnter the corresponding number:")
         print("    0 - Start monitoring the compressor.")
@@ -266,11 +272,16 @@ def main():
             print("    0 - Turn OFF the compressor.")
             print("    1 - Turn ON the compressor.")
             print("    Anything else to cancel.")
-            choice = input('> ')
-            choice2 = None
+            choice, choice2 = input('> '), None
             try:
                 choice = int(choice)
-                choice2 = input("Enter 'y' to confirm, anything else to cancel: ")
+                if chocie == 0:
+                    print("Selected: Turn OFF")
+                    choice2 = input("Enter 'y' to confirm, anything else to cancel: ")
+                elif choice == 1:
+                    print("Selected: Turn ON")
+                    choice2 = input("Enter 'y' to confirm, anything else to cancel: ")
+                # Else: the number entered is neither 0 nor 1; cancel the operation.
             except:
                 pass
             if choice2 != 'y':
