@@ -290,20 +290,22 @@ tramp
 
 
 ### MicrosoftOffice ###
-*.tmp
+# *.tmp
 
 # Word temporary
-~$*.doc*
+# ~$*.doc*
 
 # Excel temporary
-~$*.xls*
+# ~$*.xls*
 
 # Excel Backup File
-*.xlk
+# *.xlk
 
 # PowerPoint temporary
-~$*.ppt*
+# ~$*.ppt*
 
-# Personal
-Zoe/
+##### Personal
+Personal/*
 
+# Shell scripts
+*.sh
