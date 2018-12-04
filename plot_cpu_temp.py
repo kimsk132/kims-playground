@@ -24,7 +24,7 @@ from tkinter import messagebox
 
 def get_cpu_temp():
     sensors = os.popen('sensors').read()
-    pat = 'Physical id 0:\s*(\+?\d+\.?\d?)°C'
+    pat = 'Package id 0:\s*(\+?\d+\.?\d?)°C'
     m = re.search(pat, sensors)
     return float(m.group(1))
 
