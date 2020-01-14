@@ -181,15 +181,12 @@ PrintStr:
 
 # Print string whose address is in a0 and a newline afterwards
 PrintLine:
-	# Save return address
-	addi 	sp, sp, -4
-	sw 		ra, 0(sp)
-	jal 	PrintStr
-	la		a0, endl
-	jal 	PrintStr
-	# Restore return address
-	lw 		ra, 0(sp)
-	addi 	sp, sp, 4
+	add 	a1, a0, x0
+	addi 	a0, x0, 4
+	ecall
+	la 		a1, endl
+	addi 	a0, x0, 4
+	ecall
 	jalr 	ra
 
 # Find the length of zero-terminated string whose address is in a0, not including the terminating zero
@@ -276,25 +273,23 @@ StrInsertEC:
     sw 		s2, 8(sp)
     sw 		s3, 12(sp)
     sw 		s4, 16(sp)
-
     add 	s1, a0, x0 # s1 = addr string0
 	add 	s2, a1, x0 # s2 = addr string1
 	add 	s3, a2, x0 # s3 = target index a2
+
 	# Make room for string1 inside string0
 	# New length = length of str0 + str1.
-	# Copy the end of str0 to the end of "new string" then
-	# decrement the pointers until we reach index a2
-	# First, find the lengths of both strings
 	jal 	StrLenAsm # Get length of str0
 	add 	s4, a0, x0 # Save length of str0 in s4
 	add 	a0, s2, x0 # Get length of str1
-	jal 	StrLenAsm # length of str 1 is in a0
+	jal 	StrLenAsm
 	add 	t1, a0, s4 # t1 = new length
 	add 	t1, t1, s1 # t1 = new ending address
 	add 	t0, s1, s4 # t0 = old ending address
 	# Next, find the address where we stop the copy
-	add 	t2, s1, s3 # t2 = stopping address
-  # Start the copying
+	add 	t2, s1, s3 # t2 = stopping address = address of str0 + insert index
+  # Copy the end of str0 to the end of "new string" then
+  # decrement the pointers until we reach index a2 (address t2)
   StrInsertLoopTop:
   	# Copy the char
     lb 		t3, 0(t0)
