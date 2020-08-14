@@ -6,9 +6,8 @@ from torch.utils import data
 from sklearn.model_selection import train_test_split
 
 import numpy as np
-import matplotlib.pyplot as plt
 
-from mnist_set import MnistSet
+from utils import *
 from model_def import MyModel
 
 "Tune the hyperparameters here"
@@ -17,100 +16,62 @@ learning_rate = 1e-3
 decay = 1e-5
 batch_size = 64
 
+"Use these commands in interactive mode"
+def train(num_epochs=num_epochs):
+    train_and_savefig(model, optimizer, criterion, lr_scheduler, num_epochs, train_loader, val_loader)
 
+def test():
+    test_and_savefig(model, val_loader)
 
-# Loading data
-print("Loading data...")
-raw_data = np.loadtxt('./data/train.csv', dtype=int, delimiter=',', skiprows = 1, max_rows = 100000)
-# without_labels = raw_data[:,1:]
-# labels = raw_data[:,0]
+def save_model(path='./model_state.pt'):
+    torch.save(model.state_dict(), path)
+    print("Model state dict saved to disk as '{}'".format(path))
 
-# Train-test split
-train_set, test_set = train_test_split(raw_data, test_size=0.25, stratify=raw_data[:,0])
-train_loader = data.DataLoader(MnistSet(train_set), batch_size=batch_size)
-val_loader = data.DataLoader(MnistSet(test_set), batch_size=batch_size)
+def save_checkpoint(path='./checkpoint.pth'):
+    # Citation: https://discuss.pytorch.org/t/saving-model-and-optimiser-and-scheduler/52030/7
+    checkpoint = { 
+        'model': model,
+        'optimizer': optimizer,
+        'lr_scheduler': lr_scheduler
+        }
+    torch.save(checkpoint, path)
+    print("Checkpoint saved to disk as '{}'".format(path))
 
+def load_checkpoint(path='./checkpoint.pth'):
+    global model, optimizer, lr_scheduler, criterion
+    checkpoint = torch.load(path)
+    model = checkpoint['model']
+    optimizer = checkpoint['optimizer']
+    lr_scheduler = checkpoint['lr_scheduler']
+    criterion =  nn.CrossEntropyLoss()
 
-# Train
+def load_train_data():
+    global raw_data, train_set, test_set, train_loader, val_loader
+    # Loading data
+    print("Loading training data...")
+    raw_data = np.loadtxt('./data/train.csv', dtype=int, delimiter=',', skiprows = 1, max_rows = 1000)
+
+    # Train-test split
+    train_set, test_set = train_test_split(raw_data, test_size=0.25, stratify=raw_data[:,0])
+    train_loader = data.DataLoader(MnistSet(train_set), batch_size=batch_size)
+    val_loader = data.DataLoader(MnistSet(test_set), batch_size=batch_size)
+    print("Training data loaded successfully.")
+
+def run():
+    option = input("Please enter checkpoint path (enter nothing to start over)\n")
+    if option:
+        load_checkpoint(option)
+        print("Checkpoint loaded.")
+    load_train_data()
+    train()
+    test()
+    save_model()
+    save_checkpoint()
+
+# Model, loss and optimizer
 model = MyModel()
-# Loss and optimizer
 criterion =  nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=decay)
 lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
 
-print('Beginning training..')
-total_step = len(train_loader)
-tr_loss_list = []
-tr_steps = []
-val_loss_list = []
-for epoch in range(num_epochs):
-    try:
-        # Training
-        print('Epoch {}'.format(epoch+1))
-        for i, local_data in enumerate(train_loader):
-            # local_batch, local_labels = local_batch[:,1:].float().view(batch_size,1,28,28), local_batch[:,0]
-            # Forward pass
-            local_batch, local_labels = local_data
-            outputs = model.forward(local_batch)
-            loss = criterion(outputs, local_labels)
-
-            # Backward and optimize
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            if (i+1) % 10 == 0:
-                tr_loss_list.append(loss.item())
-                tr_steps.append(i+1+(epoch*total_step))
-                print ('Epoch [{}/{}], Step [{}/{}], Loss: {}'
-                       .format(epoch+1, num_epochs, i+1, total_step, loss.item()))
-        # Update learning rate
-        lr_scheduler.step()
-
-        # Validation
-        with torch.no_grad():
-            valset_loss_lst = []
-            for local_batch, local_labels in val_loader:
-                # local_batch, local_labels = local_batch[:,1:].float(), local_batch[:,0]
-
-                outputs = model.forward(local_batch)
-                loss = criterion(outputs, local_labels)
-                valset_loss_lst.append(loss.item())
-            val_loss = np.sum(valset_loss_lst) / len(valset_loss_lst)
-            print("Validation loss: {}".format(val_loss))
-            val_loss_list.append(val_loss)
-
-    except KeyboardInterrupt:
-        print("\nKeyboardInterrupt received. Stopped training.")
-        break
-
-fig_name = "loss_curve.png"
-num_steps = np.array(range(1,1+len(val_loss_list))) * total_step
-plt.figure()
-plt.plot(tr_steps, tr_loss_list, label='Training Loss')
-plt.plot([tr_steps[0]] + list(num_steps), [tr_loss_list[0]] + val_loss_list,label='Validation Loss')
-plt.xlabel("Iterations")
-plt.ylabel("Cross-entropy Loss")
-plt.legend()
-plt.savefig(fig_name,dpi=150)
-
-# Testing...
-print('Beginning Validation...')
-with torch.no_grad():
-    correct = 0
-    total = 0
-    predicted_list = []
-    groundtruth_list = []
-    for (local_batch,local_labels) in val_loader:
-
-        outputs = model.forward(local_batch)
-        _, predicted = torch.max(outputs.data, 1)
-        total += local_labels.size(0)
-        predicted_list.extend(predicted)
-        groundtruth_list.extend(local_labels)
-        correct += (predicted == local_labels).sum().item()
-
-    print('Accuracy of the network on the {} test images: {:.3f} %'.format(total, 100 * correct / total))
-
-torch.save(model.state_dict(), './model.pt')
-print("Model state dict saved to disk as './model.pt'")
+run()

@@ -4,7 +4,7 @@ from torch.utils import data
 
 import numpy as np
 
-from mnist_set import MnistTest
+from utils import MnistTest
 from model_def import MyModel
 
 # Loading data
@@ -15,7 +15,7 @@ batch_size = 64
 test_loader = data.DataLoader(MnistTest(raw_data), batch_size=batch_size)
 
 model = MyModel()
-model.load_state_dict(torch.load('./model.pt'))
+model.load_state_dict(torch.load('./model_state.pt'))
 model.eval()
 
 
