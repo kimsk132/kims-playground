@@ -49,7 +49,7 @@ def load_train_data():
     global raw_data, train_set, test_set, train_loader, val_loader
     # Loading data
     print("Loading training data...")
-    raw_data = np.loadtxt('./data/train.csv', dtype=int, delimiter=',', skiprows = 1, max_rows = 1000)
+    raw_data = np.loadtxt('./data/train.csv', dtype=int, delimiter=',', skiprows = 1, max_rows = 100000)
 
     # Train-test split
     train_set, test_set = train_test_split(raw_data, test_size=0.25, stratify=raw_data[:,0])
