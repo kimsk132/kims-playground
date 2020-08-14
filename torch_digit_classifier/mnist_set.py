@@ -14,11 +14,11 @@ class MnistSet(data.Dataset):
 
     def __getitem__(self,idx):
         'Generates one sample of data'
-        sample = self.data[idx, 1:].view((1, 28, 28)).float() / 255
+        sample = self.data[idx, 1:].view((1, 28, 28)).float()
         label = self.data[idx, 0]
         return sample, label.long()
 
 class MnistTest(MnistSet):
     def __getitem__(self,idx):
         'Generates one sample of data'
-        return self.data[idx].view((1, 28, 28)).float() / 255
+        return self.data[idx].view((1, 28, 28)).float()

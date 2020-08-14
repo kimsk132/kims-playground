@@ -1,3 +1,4 @@
+# Citation: Adapted from UC Berkeley CS 189 Spring 2019 homework 6
 import torch
 import torch.nn as nn
 from torch.utils import data
@@ -11,10 +12,12 @@ from mnist_set import MnistSet
 from model_def import MyModel
 
 "Tune the hyperparameters here"
-num_epochs = 2
-learning_rate = 1e-5
+num_epochs = 100
+learning_rate = 1e-3
 decay = 1e-5
 batch_size = 64
+
+
 
 # Loading data
 print("Loading data...")
@@ -33,6 +36,7 @@ model = MyModel()
 # Loss and optimizer
 criterion =  nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=decay)
+lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
 
 print('Beginning training..')
 total_step = len(train_loader)
@@ -58,8 +62,10 @@ for epoch in range(num_epochs):
             if (i+1) % 10 == 0:
                 tr_loss_list.append(loss.item())
                 tr_steps.append(i+1+(epoch*total_step))
-                print ('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
+                print ('Epoch [{}/{}], Step [{}/{}], Loss: {}'
                        .format(epoch+1, num_epochs, i+1, total_step, loss.item()))
+        # Update learning rate
+        lr_scheduler.step()
 
         # Validation
         with torch.no_grad():
@@ -73,7 +79,9 @@ for epoch in range(num_epochs):
             val_loss = np.sum(valset_loss_lst) / len(valset_loss_lst)
             print("Validation loss: {}".format(val_loss))
             val_loss_list.append(val_loss)
+
     except KeyboardInterrupt:
+        print("\nKeyboardInterrupt received. Stopped training.")
         break
 
 fig_name = "loss_curve.png"
@@ -102,7 +110,7 @@ with torch.no_grad():
         groundtruth_list.extend(local_labels)
         correct += (predicted == local_labels).sum().item()
 
-    print('Accuracy of the network on the {} test images: {} %'.format(total, 100 * correct / total))
+    print('Accuracy of the network on the {} test images: {:.3f} %'.format(total, 100 * correct / total))
 
 torch.save(model.state_dict(), './model.pt')
 print("Model state dict saved to disk as './model.pt'")
