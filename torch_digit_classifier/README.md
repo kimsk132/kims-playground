@@ -4,3 +4,7 @@ To train and generate a model checkpoint, run:
 ```
 python3 train.py
 ```
+To generate the .csv file for submission, run:
+```
+python3 generate_submission.py
+```
