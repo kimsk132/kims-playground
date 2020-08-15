@@ -14,7 +14,7 @@ from model_def import MyModel
 num_epochs = 100
 learning_rate = 1e-3
 decay = 1e-5
-batch_size = 64
+batch_size = 128
 
 "Use these commands in interactive mode"
 def train(num_epochs=num_epochs):
@@ -58,7 +58,7 @@ def load_train_data():
     print("Training data loaded successfully.")
 
 def run():
-    option = input("Please enter checkpoint path (enter nothing to start over)\n")
+    option = input("Please enter checkpoint path (enter nothing to start over)\npath> ")
     if option:
         load_checkpoint(option)
         print("Checkpoint loaded.")
@@ -72,6 +72,7 @@ def run():
 model = MyModel()
 criterion =  nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=decay)
-lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
+lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.75)
 
 run()
+import generate_submission

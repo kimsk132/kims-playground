@@ -8,12 +8,13 @@ from utils import MnistTest
 from model_def import MyModel
 
 # Loading data
-print("Loading test data...")
+print("Loading competition data...")
 raw_data = np.loadtxt('./data/test.csv', dtype=int, delimiter=',', skiprows = 1)
 
-batch_size = 64
+batch_size = 128
 test_loader = data.DataLoader(MnistTest(raw_data), batch_size=batch_size)
 
+print("Running classifier...")
 model = MyModel()
 model.load_state_dict(torch.load('./model_state.pt'))
 model.eval()
@@ -31,4 +32,4 @@ with torch.no_grad():
         f.write("ImageId,Label\n")
         for i, label in enumerate(predicted_list):
             f.write(f"{i+1},{label}\n")
-print("csv saved")
+print("csv saved.")
