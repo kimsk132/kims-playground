@@ -15,9 +15,11 @@ shift_hours = shift_numpy[:,1]
 # Read in employee requirements
 employee_requirements = pd.read_csv('./employee_requirements.csv', index_col=0)
 employee_hours = employee_requirements.to_numpy().reshape(n)
+
 # Deciding the "infeasibility" threshold.
 # The cost should be lower than threshold if every employee can work the shift they are assigned to.
-threshold = n * preference_table.max().max() * 10
+dislike_factor = preference_table.max().max()
+threshold = n * dislike_factor * 10
 
 # Fill the blanks in preference_table with this threshold
 preference_table = preference_table.fillna(threshold)
@@ -34,7 +36,7 @@ constraints = [
 ]
 
 # First term reflects the employee's preferences, and the second term is trying to minimizes the number of hours each person works
-obj = cp.Minimize(cp.sum(cp.multiply(C, X)) + cp.sum_squares(X @ shift_hours - employee_hours))
+obj = cp.Minimize(cp.sum(cp.multiply(C, X)) + cp.sum_squares(cp.pos(X @ shift_hours - employee_hours) * dislike_factor))
 
 prob = cp.Problem(obj, constraints)
 prob.solve()
