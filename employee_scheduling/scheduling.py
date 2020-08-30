@@ -10,8 +10,8 @@ n, m = preference_table.shape
 # Read in the shift requirements
 shift_requirements = pd.read_csv('./shift_requirements.csv', index_col=0)
 shift_numpy = shift_requirements.to_numpy()
-shift_people = shift_numpy[:,0]
-shift_hours = shift_numpy[:,1]
+shift_people = shift_numpy[0]
+shift_hours = shift_numpy[1]
 # Read in employee requirements
 employee_requirements = pd.read_csv('./employee_requirements.csv', index_col=0)
 employee_hours = employee_requirements.to_numpy().reshape(n)
@@ -35,15 +35,27 @@ constraints = [
 	np.ones(n) @ X >= shift_people 	# Each shift needs a certain number of employees as defined in shift_requirements
 ]
 
+# Handling overlapping shifts
+with open('overlap.csv') as f:
+    f.readline()
+    for line in f:
+        current_line = line.rstrip().split(',')
+        print(current_line)
+        shift_indices = [preference_table.columns.get_loc(shift) for shift in current_line]
+        constr = 0
+        for shift in shift_indices:
+            constr += X[:,shift]
+        constraints.append(constr <= 1)
+
 # First term reflects the employee's preferences, and the second term is trying to minimizes the number of hours each person works
 obj = cp.Minimize(cp.sum(cp.multiply(C, X)) + cp.sum_squares(cp.pos(X @ shift_hours - employee_hours) * dislike_factor))
 
 prob = cp.Problem(obj, constraints)
-prob.solve()
+prob.solve(verbose=True)
 
 assignment = pd.DataFrame(X.value,
 					index = preference_table.index,
-					columns = preference_table.columns)
+					columns = preference_table.columns).round()
 
 print("Status: ", prob.status)
 print("The optimal cost is", prob.value)
