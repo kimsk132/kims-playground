@@ -65,9 +65,9 @@ history_x = []
 history_y = []
 shader_x = []
 shader_y = []
-counter = 0
+counter = -1
 enable_shading = True # change to True to enable shading
-shade = enable_shading
+shade = True
 
 def init():
     line.set_data([], [])
@@ -77,9 +77,11 @@ def init():
 
 def animate(i):
     global sun, planet_x, bodies, dt, history_x, history_y, counter, shade, shader_x, shader_y, enable_shading
-    counter = (counter + 1) % 300
+    counter = (counter + 1) % 250
     if enable_shading and counter == 0:
         shade = not shade
+        shader_x.extend(np.linspace(sun.x_pos, planet_x.x_pos, 2))
+        shader_y.extend(np.linspace(sun.y_pos, planet_x.y_pos, 2))
     lst_fx = {}
     lst_fy = {}
     for a_body in bodies:
@@ -93,8 +95,8 @@ def animate(i):
 
     line.set_data(history_x, history_y)
     line2.set_data([b.x_pos for b in bodies], [b.y_pos for b in bodies])
-    xx = np.linspace(sun.x_pos, planet_x.x_pos, 100)
-    yy = np.linspace(sun.y_pos, planet_x.y_pos, 100)
+    xx = np.linspace(sun.x_pos, planet_x.x_pos, 2)
+    yy = np.linspace(sun.y_pos, planet_x.y_pos, 2)
     if shade:
         shader_x.extend(xx)
         shader_y.extend(yy)
@@ -103,5 +105,5 @@ def animate(i):
     return line, line2, shader
 
 anim = animation.FuncAnimation(fig, animate, init_func=init,
-                               frames=200, interval=1, blit=True)
+                               frames=1, interval=1, blit=True)
 plt.show()
