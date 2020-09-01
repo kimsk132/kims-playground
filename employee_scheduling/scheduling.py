@@ -19,7 +19,7 @@ employee_hours = employee_requirements.to_numpy().reshape(n)
 # Deciding the "infeasibility" threshold.
 # The cost should be lower than threshold if every employee can work the shift they are assigned to.
 dislike_factor = preference_table.max().max()
-threshold = n * dislike_factor * 10
+threshold = n * dislike_factor * 100
 
 # Fill the blanks in preference_table with this threshold
 preference_table = preference_table.fillna(threshold)
@@ -41,14 +41,14 @@ with open('overlap.csv') as f:
     for line in f:
         current_line = line.rstrip().split(',')
         print(current_line)
-        shift_indices = [preference_table.columns.get_loc(shift) for shift in current_line]
+        shift_indices = [preference_table.columns.get_loc(shift) for shift in current_line if shift]
         constr = 0
         for shift in shift_indices:
             constr += X[:,shift]
         constraints.append(constr <= 1)
 
 # First term reflects the employee's preferences, and the second term is trying to minimizes the number of hours each person works
-obj = cp.Minimize(cp.sum(cp.multiply(C, X)) + cp.sum_squares(cp.pos(X @ shift_hours - employee_hours) * dislike_factor))
+obj = cp.Minimize(cp.sum(cp.multiply(C, X) @ shift_hours) + cp.sum_squares(cp.pos(X @ shift_hours - employee_hours) * dislike_factor * 2))
 
 prob = cp.Problem(obj, constraints)
 prob.solve(verbose=True)
