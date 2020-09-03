@@ -84,23 +84,20 @@ print(assignment)
 assignment.to_csv('./raw_output.csv')
 
 # Format the output to be easy to read
-print("Result: ")
 output = {}
 for name, row in assignment.iterrows():
     assigned = []
-    for shift, value in row:
+    for shift, value in row.iteritems():
         if value == 1:
             assigned.append(shift)
     output[name] = assigned
-    print("{}: {}".format(name, assigned))
 
 with open('assignment.json', 'w') as f:
     json.dump(output, f, sort_keys=True, indent=4)
 
-
 # Check that everyone can make the shifts they are assigned
 assignment_cost = C.value * X.value
-if any(assignment_cost >= threshold):
+if (assignment_cost >= threshold).any():
     print("WARNING: Some people are scheduled to work the shift they cannot make.")
     for row_idx, row in enumerate(assignment_cost):
         for col_idx, cost in enumerate(row):
@@ -109,8 +106,10 @@ if any(assignment_cost >= threshold):
 
 # Check if anyone is assigned more hours than they need to work
 number_hours = X.value @ shift_hours
-if any(number_hours >= employee_hours):
+if (number_hours >= employee_hours).any():
     print("WARNING: Some people are assigned more hours than they need.")
     for name_idx, hours in enumerate(number_hours):
-        if hours >= threshold:
+        if hours > employee_hours[name_idx]:
                 print("{} is assigned {} hours, but needs {}".format(assignment.index[name_idx], number_hours[name_idx], employee_hours[name_idx]))
+
+print("\nResult is saved as 'assignment.json' and 'raw_output.csv'")
