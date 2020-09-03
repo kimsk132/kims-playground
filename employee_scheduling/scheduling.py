@@ -95,7 +95,7 @@ for name, row in assignment.iterrows():
     print("{}: {}".format(name, assigned))
 
 with open('assignment.json', 'w') as f:
-    json.dump(output, f)
+    json.dump(output, f, sort_keys=True, indent=4)
 
 
 # Check that everyone can make the shifts they are assigned
