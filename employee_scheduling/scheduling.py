@@ -60,7 +60,6 @@ with open('overlap.csv') as f:
     f.readline()
     for line in f:
         current_line = line.rstrip().split(',')
-        print(current_line)
         shift_indices = [preference_table.columns.get_loc(shift) for shift in current_line if shift]
         constr = 0
         for shift in shift_indices:
