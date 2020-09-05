@@ -70,7 +70,7 @@ with open('overlap.csv') as f:
 obj = cp.Minimize(cp.sum(cp.multiply(C, X) @ shift_hours) + cp.sum_squares(cp.pos(X @ shift_hours - employee_hours) * dislike_factor * 2))
 
 prob = cp.Problem(obj, constraints)
-prob.solve(verbose=True)
+prob.solve(solver="SCIP", scip_params={'limits/gap':0}, verbose=True) # Adjust gap tolerance here
 
 assignment = pd.DataFrame(X.value,
                     index = preference_table.index,
