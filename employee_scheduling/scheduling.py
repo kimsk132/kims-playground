@@ -70,7 +70,12 @@ with open('overlap.csv') as f:
 obj = cp.Minimize(cp.sum(cp.multiply(C, X) @ shift_hours) + cp.sum_squares(cp.pos(X @ shift_hours - employee_hours) * dislike_factor * 2))
 
 prob = cp.Problem(obj, constraints)
-prob.solve(solver="SCIP", scip_params={'limits/gap':0}, verbose=True) # Adjust gap tolerance here
+prob.solve(verbose=True) # Adjust gap tolerance here
+
+# gap tolerance for scip and cplex
+# scip_params={'limits/gap':0}
+# cplex_params={'mip.tolerances.mipgap':0.3}
+
 
 assignment = pd.DataFrame(X.value,
                     index = preference_table.index,
@@ -78,8 +83,7 @@ assignment = pd.DataFrame(X.value,
 
 print("Status: ", prob.status)
 print("The optimal cost is", prob.value)
-print("A solution is")
-print(assignment)
+
 assignment.to_csv('./raw_output.csv')
 
 # Format the output to be easy to read
@@ -104,11 +108,31 @@ if (assignment_cost >= threshold).any():
                 print("{} cannot make {}".format(assignment.index[row_idx], assignment.columns[col_idx]))
 
 # Check if anyone is assigned more hours than they need to work
-number_hours = X.value @ shift_hours
-if (number_hours >= employee_hours).any():
+number_hours = np.around(X.value) @ shift_hours
+if (number_hours > employee_hours).any():
     print("WARNING: Some people are assigned more hours than they need.")
     for name_idx, hours in enumerate(number_hours):
         if hours > employee_hours[name_idx]:
                 print("{} is assigned {} hours, but needs {}".format(assignment.index[name_idx], number_hours[name_idx], employee_hours[name_idx]))
 
 print("\nResult is saved as 'assignment.json' and 'raw_output.csv'")
+
+# Assessment
+indv_loss = pd.DataFrame(assignment.mul(C.value).mul(shift_hours).sum(axis=1) / employee_hours,
+                columns=['Average preferences'])
+indv_loss.index.name = 'Name'
+
+print("==================== Summary ====================")
+print(indv_loss)
+print("Average preference:", indv_loss.mean()[0])
+print("Std:", indv_loss.std()[0])
+print("Pref < 2:", (indv_loss < 2).sum()[0])
+print("Pref == 2:", (indv_loss == 2).sum()[0])
+print("Pref > 2:", (indv_loss > 2).sum()[0])
+
+import matplotlib.pyplot as plt
+
+plt.hist(indv_loss.to_numpy())
+plt.xlabel('Average preference')
+plt.ylabel('Number of people')
+plt.show()
