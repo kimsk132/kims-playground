@@ -41,8 +41,18 @@ shift_numpy = shift_requirements.to_numpy()
 shift_people = shift_numpy[0]
 shift_hours = shift_numpy[1]
 
-# Make sure the shift requirement is consistent with preference table
-assert all(shift_requirements.columns == preference_table.columns), "Shift requirement table must have the same columns as preference table."
+# Make sure the shift requirement is consistent with preference table, and show differences when assertion fails
+try:
+    assert all(shift_requirements.columns == preference_table.columns), "Shift requirement table must have the same columns as preference table."
+except AssertionError as e:
+    print("ERROR:", e)
+    print('Shift Requirements', '\t==== v.s. ====\t', 'Preference Table')
+    for s, p in zip(shift_requirements.columns, preference_table.columns):
+        if s != p:
+            print(s, '\t==== v.s. ====\t', p)
+    if len(shift_requirements.columns) != len(preference_table.columns):
+        print("Shift requirements and preference table have different numbers of columns.")
+    raise
 
 # Define the optimization problem
 X = cp.Variable((n, m), boolean=True)
@@ -77,13 +87,12 @@ prob.solve(verbose=True) # Adjust gap tolerance here
 # cplex_params={'mip.tolerances.mipgap':0.3}
 
 
-assignment = pd.DataFrame(X.value,
-                    index = preference_table.index,
-                    columns = preference_table.columns).round().astype('int')
-
 print("Status: ", prob.status)
 print("The optimal cost is", prob.value)
 
+assignment = pd.DataFrame(X.value,
+                    index = preference_table.index,
+                    columns = preference_table.columns).round().astype('int')
 assignment.to_csv('./raw_output.csv')
 
 # Format the output to be easy to read
